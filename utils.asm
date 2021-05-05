@@ -392,7 +392,51 @@
 			 lw $ra, 0($sp)
 			 addi $sp, $sp, 4
 			 jr $ra
+			 
+# subprogram: printIntArray
+# author: Chu Manh Hai
+# purpose: print int array
+# input: $a0 - base address of array
+# output: $a1 - size of array
+# return: none
+.text
+printIntArray:
+	addi $sp, $sp, -16
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	
+	# store base and size
+	move $s0, $a0
+	move $s1, $a1
+	
+	# loop
+	li $s2, 0
+	printIntArray_loop:
+		beq $s2, $s1, printIntArray_end_loop
+		sll $t0, $s2, 2
+		add $t0, $t0, $s0
 		
+		# print element
+		lw $a0, 0($t0)
+		jal printInt
+		
+		# print saparator
+		la $a0, printIntArray_comma
+		jal printString
+		
+		addi $s2, $s2, 1
+		j printIntArray_loop
+	printIntArray_end_loop:
+		lw $ra, 0($sp)
+		sw $s0, 4($sp)
+		sw $s1, 8($sp)
+		sw $s2, 12($sp)
+		addi $sp, $sp, 16
+		jr $ra
+.data
+	printIntArray_comma: .asciiz ", "
 
 		
 		
