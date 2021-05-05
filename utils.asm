@@ -309,9 +309,11 @@
 # output: none
 .text
 	concat:
-		# store $ra
-		addi $sp, $sp, -4
+		# store $ra, $s6, $s7
+		addi $sp, $sp, -12
 		sw $ra, 0($sp)
+		sw $s6, 4($sp)
+		sw $s7, 8($sp)
 		
 		# copy $a0 to $a2
 		add $s6, $a0, $zero
@@ -326,8 +328,11 @@
 		add $a1, $s7, $zero
 		jal strcpy
 		
+		# load data
 		lw $ra, 0($sp)
-		add $sp, $sp, 4
+		lw $s6, 4($sp)
+		lw $s7, 8($sp)
+		add $sp, $sp, 12
 		jr $ra
 		
 # subprogram: exit_program
@@ -363,7 +368,6 @@
 # purpose: reverse a string and return new one
 # input: $a0 - address of the string
 #	$a1 - address of reversed string
-#	$t7, %t8 - temporary values
 # output: none
 .text
 	reverse_string:
@@ -397,8 +401,8 @@
 # author: Chu Manh Hai
 # purpose: print int array
 # input: $a0 - base address of array
-# output: $a1 - size of array
-# return: none
+# 	$a1 - size of array
+# output: none
 .text
 printIntArray:
 	addi $sp, $sp, -16
@@ -437,6 +441,21 @@ printIntArray:
 		jr $ra
 .data
 	printIntArray_comma: .asciiz ", "
+	
+# subprogram: max
+# author: Chu Manh Hai
+# purpose: get max of 2 number
+# input: $a0, $a1 - two numbers
+# output: $v0 - max
+.text
+max:
+	bgt $a0, $a1, max_greater
+	addi $v0, $a1, 0
+	jr $ra
+	
+	max_greater:
+		addi $v0, $a0, 0
+		jr $ra
 
 		
 		
