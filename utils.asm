@@ -415,6 +415,10 @@ printIntArray:
 	move $s0, $a0
 	move $s1, $a1
 	
+	# print open blacket
+	la $a0, printIntArray_blacket_open
+	jal printString
+	
 	# loop
 	li $s2, 0
 	printIntArray_loop:
@@ -433,6 +437,10 @@ printIntArray:
 		addi $s2, $s2, 1
 		j printIntArray_loop
 	printIntArray_end_loop:
+		# print close blacket
+		la $a0, printIntArray_blacket_close
+		jal printString
+		# restore values
 		lw $ra, 0($sp)
 		sw $s0, 4($sp)
 		sw $s1, 8($sp)
@@ -441,6 +449,64 @@ printIntArray:
 		jr $ra
 .data
 	printIntArray_comma: .asciiz ", "
+	printIntArray_blacket_open: .asciiz "[" 
+	printIntArray_blacket_close: .asciiz "]"
+	
+# subprogram: printIntArrayDes
+# author: Chu Manh Hai
+# purpose: print int array in descending order
+# input: $a0 - base address of array
+# 	$a1 - size of array
+# output: none
+.text
+printIntArrayDes:
+	addi $sp, $sp, -16
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	
+	# store last and size
+	move $s0, $a0
+	move $s1, $a1
+	
+	# print open blacket
+	la $a0, printIntArrayDes_blacket_open
+	jal printString
+	
+	# loop
+	move $s2, $s1
+	addi $s2, $s2, -1
+	printIntArrayDes_loop:
+		blt $s2, 0, printIntArrayDes_end_loop
+		sll $t0, $s2, 2
+		add $t0, $t0, $s0
+		
+		# print element
+		lw $a0, 0($t0)
+		jal printInt
+		
+		# print saparator
+		la $a0, printIntArrayDes_comma
+		jal printString
+		
+		addi $s2, $s2, -1
+		j printIntArrayDes_loop
+	printIntArrayDes_end_loop:
+		# print close blacket
+		la $a0, printIntArrayDes_blacket_close
+		jal printString
+		# restore values
+		lw $ra, 0($sp)
+		sw $s0, 4($sp)
+		sw $s1, 8($sp)
+		sw $s2, 12($sp)
+		addi $sp, $sp, 16
+		jr $ra
+.data
+	printIntArrayDes_comma: .asciiz ", "
+	printIntArrayDes_blacket_open: .asciiz "[" 
+	printIntArrayDes_blacket_close: .asciiz "]"
 	
 # subprogram: max
 # author: Chu Manh Hai
@@ -456,6 +522,84 @@ max:
 	max_greater:
 		addi $v0, $a0, 0
 		jr $ra
+		
+# subprogram: swapInt
+# author: Chu Manh Hai
+# purpose: swap value of 2 int number
+# input $a0 - address of first int
+#	$a1 - address of second int
+# output: none
+.text
+swapInt:
+	lw $t0, 0($a0)
+	lw $t1, 0($a1)
+	
+	sw $t1, 0($a0)
+	sw $t0, 0($a1)
+	
+	jr $ra
+
+		
+# subprogram: bubbleSort
+# author: Chu Manh Hai
+# purpose: sort an int array by bubble sort algorithm
+# input: $a0 - array base
+#	$a1 - array size
+# output: none
+.text
+bubbleSort:
+	# store value
+	addi $sp, $sp, -20
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	sw $s3, 16($sp)
+	
+	move $s0, $a0
+	move $s1, $a1
+	
+	addi $s2, $s1, -2
+	bubbleSort_outerLoop:
+		blt $s2, 0, bubbleSort_outLoop_exit
+		li $s3, 0
+		bubbleSort_innerLoop:
+			bgt $s3, $s2, bubbleSort_innerLoop_exit
+			# get a[i]
+			sll $t0, $s3, 2
+			add $t0, $t0, $s0
+			lw $t2, 0($t0)
+			# get a[i+1]
+			addi $t1, $s3, 1
+			sll $t1, $t1, 2
+			add $t1, $t1, $s0
+			lw $t3, 0($t1)
+			# if a[i] > a[i+1] swap
+			bgt $t2, $t3, bubbleSort_swap
+			j bubbleSort_innerLoop_continue
+			bubbleSort_swap:
+				move $a0, $t0
+				move $a1, $t1
+				jal swapInt
+			bubbleSort_innerLoop_continue:
+				addi $s3, $s3, 1
+				j bubbleSort_innerLoop
+		bubbleSort_innerLoop_exit:
+			addi $s2, $s2, -1
+			j bubbleSort_outerLoop
+	bubbleSort_outLoop_exit:
+		lw $ra, 0($sp)
+		lw $s0, 4($sp)
+		lw $s1, 8($sp)
+		lw $s2, 12($sp)
+		lw $s3, 16($sp)
+		addi $sp, $sp, 20
+		
+		jr $ra
+			
+			
+		
+	
 
 		
 		
