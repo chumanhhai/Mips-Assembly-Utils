@@ -597,8 +597,182 @@ bubbleSort:
 		
 		jr $ra
 			
-			
+# subprogram: allocate_heap
+# author: Chu Manh Hai
+# purpose: allocate space in heap
+# input: $a0 - size
+# output: $v0 - address
+.text
+allocate_heap:
+	li $v0, 9
+	syscall
+	
+	jr $ra
+	
+
+# subprogram: selectionSort
+# author: Chu Manh Hai
+# purpose: sort an int array by selection sort algorithm
+# input: $a0 - array base
+#	$a1 - array size
+# output: none
+.text
+selectionSort:
+	# store data
+	addi $sp, $sp, -32
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	sw $s2, 12($sp)
+	sw $s3, 16($sp)
+	sw $s4, 20($sp)
+	sw $s5, 24($sp)
+	sw $s6, 28($sp)
+	
+	move $s0, $a0
+	move $s1, $a1
+	li $s2, 0
+	add $s3, $s1, -1
+	
+	selectionSort_outer_loop:
+		beq $s2, $s3, selectionSort_outer_loop_exit
+		# store address of a[i]
+		sll $s6, $s2, 2
+		add $s6, $s6, $s0
 		
+		move $s5, $s6 # address of min
+		add $s4, $s2, 1
+		selectionSort_inner_loop:
+			beq $s4, $s1, selectionSort_inner_loop_exit
+			# store address of a[j]
+			sll $t1, $s4, 2
+			add $t1, $t1, $s0
+			
+			lw $t2, 0($s5) # min
+			lw $t3, 0($t1) # a[j]
+			blt $t3, $t2, selectionSort_if_less # if a[j] < min
+			j selectionSort_inner_loop_continue
+			selectionSort_if_less:
+				move $s5, $t1
+			selectionSort_inner_loop_continue:
+				addi $s4, $s4, 1
+				j selectionSort_inner_loop
+		selectionSort_inner_loop_exit:
+			# swap a[i] and min
+			move $a0, $s5
+			move $a1, $s6
+			jal swapInt
+			addi $s2, $s2, 1
+	selectionSort_outer_loop_exit:
+		lw $ra, 0($sp)
+		lw $s0, 4($sp)
+		lw $s1, 8($sp)
+		lw $s2, 12($sp)
+		lw $s3, 16($sp)
+		lw $s4, 20($sp)
+		lw $s5, 24($sp)
+		lw $s6, 28($sp)
+		addi $sp, $sp, 32
+		
+		jr $ra
+			 
+# subprogram: is_prime
+# author: Chu Manh Hai
+# purpose: check if an int is a prime
+# input: $a0 - an int
+# output: $v0 - result: 0 means no, 1 means yes
+.text
+is_prime:
+	 # store data
+	 addi $sp, $sp, -8
+	 sw $s0, 0($sp)
+	 sw $s1, 4($sp)
+	 
+	 #
+	 move $s0, $a0
+	 li $s1, 2
+	 is_prime_loop:
+	 	li $v0, 1
+	 	beq $s1, $s0, is_prime_loop_exit
+	 	rem $t0, $s0, $s1
+	 	beqz $t0, is_prime_if_divisible
+	 	j is_prime_loop_continue
+	 	is_prime_if_divisible:
+	 		li $v0, 0
+	 		j is_prime_loop_exit
+	 	is_prime_loop_continue:
+	 		addi $s1, $s1, 1
+	 		j is_prime_loop
+	 is_prime_loop_exit:
+	 	lw $s0, 0($sp)
+	 	lw $s1, 4($sp)
+	 	addi $sp, $sp, 8
+	 	
+	 	jr $ra
+	 	
+# subprogram: binary_search
+# author: Chu Manh Hai
+# purpose: search for elment in int array
+# input: $a0 - address of array
+#	$a1 - start
+#	$a2 - end
+#	$a3 - an integer
+# output: $v0 - index of integer (-1 means that an int does not exist)
+#	$v1 - number of recursion to be called
+.text
+binary_search:
+	# store value
+	addi $sp, $sp, -12
+	sw $ra, 0($sp)
+	sw $s0, 4($sp)
+	sw $s1, 8($sp)
+	
+	# not found condition
+	bgt $a1, $a2, binary_search_return_not_found
+	
+	# search
+	add $s0, $a1, $a2
+	div $s0, $s0, 2 # index of middle
+	sll $s1, $s0, 2 
+	add $s1, $s1, $a0
+	lw $s1, 0($s1) # value of middle
+	
+	beq $s1, $a3, binary_search_if_equal # if middle = x
+	bgt $s1, $a3, binary_search_if_greater # if middle > x
+	j binary_search_if_less # if middle < x
+	
+	binary_search_if_equal:
+		move $v0, $s0
+		li $v1, 1
+		j binary_search_return
+	binary_search_if_greater:
+		addi $s0, $s0, -1
+		move $a2, $s0
+		jal binary_search
+		addi $v1, $v1, 1
+		j binary_search_return
+	binary_search_if_less:
+		addi $s0, $s0, 1
+		move $a1, $s0
+		jal binary_search
+		addi $v1, $v1, 1
+		j binary_search_return
+	binary_search_return_not_found:
+		li $v0, -1
+		li $v1, 1
+		j binary_search_return
+	binary_search_return:
+		lw $ra, 0($sp)
+		lw $s0, 4($sp)
+		lw $s1, 8($sp)
+		addi $sp, $sp, 12
+		
+		jr $ra
+	
+	
+	
+	
+	 	
 	
 
 		
